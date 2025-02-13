@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/4173a186-b5dc-46aa-85ef-f9f6adbb85bd)# Header-4n4l1z3r
+# Header-4n4l1z3r
 
 ![image](https://github.com/user-attachments/assets/53a8f4bd-9b95-4965-a6f1-500261ec19cd)
 
