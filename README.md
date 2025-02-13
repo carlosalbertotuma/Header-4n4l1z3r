@@ -31,7 +31,7 @@ Exibe de forma clara os cabeçalhos encontrados, cabeçalhos ausentes e sugestõ
 Certifique-se de que você tenha o curl instalado no seu sistema para fazer as requisições HTTP.
 A ferramenta foi projetada para rodar em sistemas Unix-like (Linux/macOS).
 
-- Uso Básico
+# Uso Básico
 Execute o script passando a URL do site que você deseja analisar.
 
 - git clone https://github.com/carlosalbertotuma/Header-4n4l1z3r.git
