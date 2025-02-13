@@ -135,17 +135,6 @@ for header in "${!SUGESTOES[@]}"; do
     echo
 done
 
-
-
-
-
-#for HEADER in "${HEADERS_RECOMENDADOS[@]}"; do
-#    if ! echo "$RESPONSE_HEADERS" | grep -i -q "^$HEADER:"; then
- #       echo -e "⚠️ \e[33mAdicione $HEADER para melhorar a segurança:\e[0m"
-#        echo "   $HEADER: ${SUGESTOES[$HEADER]}"
-#    fi
-#done
-
 # Analisando Políticas de Cross-Origin
 
 # Cross-Origin Embedder Policy (COEP)
