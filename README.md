@@ -34,7 +34,10 @@ A ferramenta foi projetada para rodar em sistemas Unix-like (Linux/macOS).
 - Uso Básico
 Execute o script passando a URL do site que você deseja analisar.
 
-./head_analyzer.sh <URL>
+- git clone https://github.com/carlosalbertotuma/Header-4n4l1z3r.git
+- cd Header-4n4l1z3r
+- chmod +x Header-4n4l1z3r
+- ./head_analyzer.sh <URL>
 
 Caso não forneça uma URL, a ferramenta mostrará uma mensagem de erro com a sintaxe correta.
 
