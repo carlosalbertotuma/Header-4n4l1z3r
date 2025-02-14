@@ -1,32 +1,45 @@
 #!/bin/bash
+URL="${1}"
 
+# Função para exibir o banner
 banner()
 {
-
     echo '                      _             _  _         _  _   _ _     _____      '
     echo '  /\  /\___  __ _  __| | ___ _ __  | || |  _ __ | || | | / |___|___ / _ __ '
     echo ' / /_/ / _ \/ _` |/ _` |/ _ \  __| | || |_|  _ \| || |_| | |_  / |_ \|  __|'
     echo '/ __  /  __/ (_| | (_| |  __/ |    |__   _| | | |__   _| | |/ / ___) | |   '
     echo '\/ /_/ \___|\__,_|\__,_|\___|_|       |_| |_| |_|  |_| |_|_/___|____/|_|   '
     echo '                                                                           '    
-    echo "Desenvolvido por Carlos Tuma - Bl4dsc4n - Version 0.1"
+    echo "Desenvolvido por Carlos Tuma - Bl4dsc4n - Version 1.0"
     echo
     
 }
 
-modouso()
-{
+# Função para exibir o modo de uso
+modouso() {
     echo -e "\e[31m[ERRO] Uso: $0 <URL>\e[0m"
 }
 
 # Verifica se a URL foi passada como argumento
-if [ -z "$1" ]; then
+if [ -z "${1}" ]; then
     banner
     modouso
     exit 1
+elif [[ ! "${1}" =~ ^https?:// ]]; then
+  color_output "ALERT" "URL inválida: $URL"
+  exit 1
+
 fi
 
-URL="$1"
+# Função para exibir mensagens coloridas
+color_output() {
+  case $1 in
+    "INFO") echo -e "\e[34m[INFO]\e[0m $2" ;;   # Azul
+    "WARNING") echo -e "\e[33m[WARNING]\e[0m $2" ;;  # Amarelo
+    "ALERT") echo -e "\e[31m[ALERT]\e[0m $2" ;;  # Vermelho
+    *) echo "$2" ;;
+  esac
+}
 
 # Lista de headers de segurança recomendados
 HEADERS_RECOMENDADOS=(
@@ -38,147 +51,154 @@ HEADERS_RECOMENDADOS=(
     "Referrer-Policy"
     "Permissions-Policy"
     "Expect-CT"
+    "Cross-Origin-Embedder-Policy"
+    "Cross-Origin-Opener-Policy"
+    "Cross-Origin-Resource-Policy"
+    "Access-Control-Allow-Origin"
 )
 
-# Função para descrever o propósito de cada header
+# Descrição e políticas recomendadas para cada header
 declare -A HEADER_DESCRICAO
 HEADER_DESCRICAO=(
-    ["Content-Security-Policy"]="Define as fontes permitidas para conteúdo como scripts e imagens, prevenindo injeções de código."
-    ["X-Frame-Options"]="Impedir que o conteúdo seja exibido dentro de frames ou iframes, mitigando ataques clickjacking."
-    ["X-XSS-Protection"]="Ativa proteção contra ataques de cross-site scripting (XSS)."
+    ["Content-Security-Policy"]="Define as fontes permitidas para conteúdo como scripts e imagens, prevenindo injeções de código malicioso."
+    ["X-Frame-Options"]="Impedir que o conteúdo seja exibido dentro de frames ou iframes, mitigando ataques de clickjacking."
+    ["X-XSS-Protection"]="Ativa proteção contra ataques de cross-site scripting (XSS), bloqueando a execução de scripts maliciosos."
     ["X-Content-Type-Options"]="Evita que o navegador tente adivinhar o tipo de conteúdo, ajudando a prevenir ataques de MIME sniffing."
-    ["Strict-Transport-Security"]="Força a comunicação segura via HTTPS, prevenindo ataques man-in-the-middle."
-    ["Referrer-Policy"]="Controla as informações do referenciador enviadas nas requisições HTTP, protegendo a privacidade."
-    ["Permissions-Policy"]="Controla o acesso a recursos específicos do navegador, como geolocalização ou câmera."
-    ["Expect-CT"]="Força a verificação de certificados de segurança em relação ao site."
-)
-
-# Captura headers da resposta HTTP
-RESPONSE_HEADERS=$(curl -s -I --http2 --max-time 10 "$URL")
-
-# Verifica se a URL está acessível
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
-if [ "$HTTP_STATUS" -ge 400 ]; then
-    echo -e "\e[31m[ERRO] O site retornou um código HTTP $HTTP_STATUS. Verifique a URL.\e[0m"
-    exit 1
-fi
-
-# Exibir headers obtidos
-banner
-echo -e "\n🔎 \e[34mAnalisando headers de resposta para:\e[0m $URL\n"
-echo -e "📜 \e[34mHeaders encontrados:\e[0m\n$RESPONSE_HEADERS"
-
-# Verificar headers presentes
-echo -e "\n✅ \e[32mHeaders presentes:\e[0m\n"
-for HEADER in "${HEADERS_RECOMENDADOS[@]}"; do
-    if echo "$RESPONSE_HEADERS" | grep -i -q "^$HEADER:"; then
-        echo -e "✅ \e[32m$HEADER:\e[0m ${HEADER_DESCRICAO[$HEADER]}"
-    fi
-done
-
-# Verificar headers ausentes
-echo -e "\n⚠️ \e[32m**Vulnerabilidade detectada**: (CWE: 693) CVSS3 Score: 3.1 LOW\e[0m"
-echo -e "\n🚨 \e[31mHeaders de segurança ausentes:\e[0m\n"
-MISSING_HEADERS=0
-for HEADER in "${HEADERS_RECOMENDADOS[@]}"; do
-    if ! echo "$RESPONSE_HEADERS" | grep -i -q "^$HEADER:"; then
-        echo -e "❌ \e[31m$HEADER (Faltando)\e[0m"
-        ((MISSING_HEADERS++))
-    fi
-done
-
-if [ "$MISSING_HEADERS" -eq 0 ]; then
-    echo -e "✅ \e[32mTodos os headers de segurança essenciais estão presentes!\e[0m"
-fi
-
-# Sugestões para headers ausentes
-echo -e "\n💡 \e[33mSugestões de melhorias:\e[0m\n"
-
-declare -A SUGESTOES=(
-    ["X-Frame-Options"]="Impedir que o conteúdo do seu site seja carregado em um frame ou iframe em sites de terceiros, protegendo contra ataques de clickjacking (onde o usuário é enganado a clicar em elementos ocultos ou maliciosos)."
-    
-    ["Referrer-Policy"]="Controla a quantidade de informações de referenciador enviadas em requisições HTTP, protegendo a privacidade do usuário e evitando a exposição de informações sensíveis, como a URL original de onde a requisição foi feita."
-    
-    ["Permissions-Policy"]="Define as permissões de acesso a recursos sensíveis do navegador, como geolocalização, câmera e microfone, impedindo que sites maliciosos acessem essas funcionalidades sem o consentimento do usuário."
-    
-    ["Expect-CT"]="Força a verificação de certificados TLS e garante que os certificados utilizados pelo site estejam listados em um log de certificação pública (CT), prevenindo ataques como ataques de certificação falsificada."
-    
-    ["Cross-Origin-Embedder-Policy"]="Reforça segurança contra embeddings não confiáveis, controlando o carregamento de recursos de diferentes origens."
-    
-    ["Cross-Origin-Opener-Policy"]="Reforça isolamento de contexto entre origens, garantindo que scripts não possam acessar dados de outras origens."
-    
+    ["Strict-Transport-Security"]="Força a comunicação segura via HTTPS, prevenindo ataques man-in-the-middle e garantindo a integridade dos dados."
+    ["Referrer-Policy"]="Controla as informações do referenciador enviadas nas requisições HTTP, protegendo a privacidade do usuário."
+    ["Permissions-Policy"]="Controla o acesso a recursos específicos do navegador, como geolocalização ou câmera, aumentando a privacidade do usuário."
+    ["Expect-CT"]="Força a verificação de certificados de segurança em relação ao site, prevenindo o uso de certificados inválidos."
+    ["Cross-Origin-Embedder-Policy"]="Reforça a segurança contra embeddings não confiáveis, controlando o carregamento de recursos de diferentes origens."
+    ["Cross-Origin-Opener-Policy"]="Reforça o isolamento de contexto entre origens, garantindo que scripts não possam acessar dados de outras origens."
     ["Cross-Origin-Resource-Policy"]="Restringe quais sites podem carregar seus recursos, evitando o carregamento indesejado por sites não confiáveis."
-    
-    ["CORS"]="Define políticas de compartilhamento de recursos entre origens diferentes, controlando quais sites podem acessar os recursos da sua aplicação."
+    ["Access-Control-Allow-Origin"]="Define políticas de compartilhamento de recursos entre origens diferentes, controlando quais sites podem acessar os recursos da sua aplicação."
 )
 
-declare -A POLITICAS=(
+declare -A POLITICAS_RECOMENDADAS
+POLITICAS_RECOMENDADAS=(
+    ["Content-Security-Policy"]="default-src 'self';"
     ["X-Frame-Options"]="DENY"
+    ["X-XSS-Protection"]="1; mode=block"
+    ["X-Content-Type-Options"]="nosniff"
+    ["Strict-Transport-Security"]="max-age=31536000; includeSubDomains"
     ["Referrer-Policy"]="no-referrer"
     ["Permissions-Policy"]="geolocation=(), microphone=(), camera=()"
     ["Expect-CT"]="max-age=86400, enforce"
     ["Cross-Origin-Embedder-Policy"]="require-corp"
     ["Cross-Origin-Opener-Policy"]="same-origin"
     ["Cross-Origin-Resource-Policy"]="same-origin"
-    ["CORS"]="https://exemplo.com"
+    ["Access-Control-Allow-Origin"]="https://exemplo.com"
 )
 
-for header in "${!SUGESTOES[@]}"; do
-    # Primeira linha amarela com o nome do header
-    echo -e "⚠️ Adicione \033[33m$header\033[0m para melhorar a segurança:"
+# Função para seguir redirecionamentos e capturar headers
+seguir_redirecionamento() {
+    local url="$1"
+    local depth="$2"
+    local response=$(curl -s -I --http2 --max-time 10 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3" "$url")
+    local status_code=$(echo "$response" | grep -i "HTTP/" | awk '{print $2}')
+    local location=$(echo "$response" | grep -i "Location:" | awk '{print $2}' | tr -d '\r')
     
-    # Descrição do header
-    echo -e "${SUGESTOES[$header]}"
-    
-    # Linha "Para definir o header" em amarelo com o valor real do header
-    echo -e "\033[32mPara definir o header:\033[0m \033[33m$header: ${POLITICAS[$header]}\033[0m"
-    echo
-done
+   
+    echo -e "\n🔎 \e[34mAnalisando headers de resposta para (Redirecionamento $depth):\e[0m $url\n"
+    echo -e "📜 \e[34mHeaders encontrados:\e[0m\n$response"
 
-# Analisando Políticas de Cross-Origin
+    # Verificar headers presentes e suas configurações
+    echo -e "\n✅ \e[32mHeaders presentes:\e[0m\n"
+    for HEADER in "${HEADERS_RECOMENDADOS[@]}"; do
+        if echo "$response" | grep -i -q "^$HEADER:"; then
+            HEADER_VALUE=$(echo "$response" | grep -i "^$HEADER:" | cut -d' ' -f2-)
+            
+            if [[ "$HEADER" == "X-XSS-Protection" || "$HEADER" == "X-Content-Type-Options" ]]; then
+                # Normalizar o valor e o valor recomendado
+                normalized_value=$(echo "$HEADER_VALUE" | tr '[:upper:]' '[:lower:]' | sed 's/ //g')
+                normalized_recommended_value=$(echo "${POLITICAS_RECOMENDADAS[$HEADER]}" | tr '[:upper:]' '[:lower:]' | sed 's/ //g')
 
-# Cross-Origin Embedder Policy (COEP)
-if echo "$RESPONSE_HEADERS" | grep -qi "Cross-Origin-Embedder-Policy"; then
-    echo -e "✅ \e[32mCross-Origin-Embedder-Policy está presente.\e[0m Protege contra ataques de injeção de recursos."
-else
-    echo -e "⚠️ \e[33mAdicione Cross-Origin-Embedder-Policy para reforçar segurança contra embeddings não confiáveis:\e[0m"
-    echo "   Cross-Origin-Embedder-Policy: require-corp"
-fi
+                if [[ "$normalized_value" == "$normalized_recommended_value" ]]; then
+                    echo -e "✅ \e[32m$HEADER:\e[0m ${HEADER_DESCRICAO[$HEADER]}"
+                    echo -e "   \e[32mConfiguração atual: Ótima!\e[0m $HEADER: $HEADER_VALUE"
+                else
+                    echo -e "✅ \e[32m$HEADER:\e[0m ${HEADER_DESCRICAO[$HEADER]}"
+                    echo -e "   \e[34mConfiguração atual:\e[0m $HEADER: $HEADER_VALUE"
+                    echo -e "   \e[33mSugestão de melhoria:\e[0m $HEADER: ${POLITICAS_RECOMENDADAS[$HEADER]}"
+                fi
+            else
+                echo -e "✅ \e[32m$HEADER:\e[0m ${HEADER_DESCRICAO[$HEADER]}"
+                echo -e "   \e[34mConfiguração atual:\e[0m $HEADER: $HEADER_VALUE"
+                if [ "$HEADER_VALUE" != "${POLITICAS_RECOMENDADAS[$HEADER]}" ]; then
+                    echo -e "   \e[33mSugestão de melhoria:\e[0m $HEADER: ${POLITICAS_RECOMENDADAS[$HEADER]}"
+                fi
+            fi
+        fi
+    done
 
-# Cross-Origin Opener Policy (COOP)
-if echo "$RESPONSE_HEADERS" | grep -qi "Cross-Origin-Opener-Policy"; then
-    echo -e "✅ \e[32mCross-Origin-Opener-Policy está presente.\e[0m Protege contra ataques de cross-origin."
-else
-    echo -e "⚠️ \e[33mAdicione Cross-Origin-Opener-Policy para reforçar isolamento de contexto:\e[0m"
-    echo "   Cross-Origin-Opener-Policy: same-origin"
-fi
+    # Verificar headers ausentes
+    echo -e "\n⚠️ \e[32m**Vulnerabilidade detectada**: (CWE: 693) CVSS3 Score: 3.1 LOW\e[0m"
+    echo -e "\n🚨 \e[31mHeaders de segurança ausentes:\e[0m\n"
+    MISSING_HEADERS=0
+    for HEADER in "${HEADERS_RECOMENDADOS[@]}"; do
+        if ! echo "$response" | grep -i -q "^$HEADER:"; then
+            echo -e "❌ \e[31m$HEADER (Faltando)\e[0m"
+            echo -e "   \e[34mDescrição:\e[0m ${HEADER_DESCRICAO[$HEADER]}"
+            echo -e "   \e[33mSugestão de melhoria:\e[0m $HEADER: ${POLITICAS_RECOMENDADAS[$HEADER]}"
+            ((MISSING_HEADERS++))
+        fi
+    done
 
-# Cross-Origin Resource Policy (CORP)
-if echo "$RESPONSE_HEADERS" | grep -qi "Cross-Origin-Resource-Policy"; then
-    echo -e "✅ \e[32mCross-Origin-Resource-Policy está presente.\e[0m Protege contra acesso indevido a recursos."
-else
-    echo -e "⚠️ \e[33mAdicione Cross-Origin-Resource-Policy para restringir quais sites podem carregar seus recursos:\e[0m"
-    echo "   Cross-Origin-Resource-Policy: same-origin"
-fi
+    if [ "$MISSING_HEADERS" -eq 0 ]; then
+        echo -e "✅ \e[32mTodos os headers de segurança essenciais estão presentes!\e[0m"
+    fi
 
-# Cross-Origin Resource Sharing (CORS)
-if echo "$RESPONSE_HEADERS" | grep -qi "Access-Control-Allow-Origin"; then
-    echo -e "✅ \e[32mCORS (Access-Control-Allow-Origin) está presente.\e[0m Controla acesso de outras origens."
-else
-    echo -e "⚠️ \e[33mAdicione CORS para definir políticas de compartilhamento de recursos entre origens diferentes:\e[0m"
-    echo "   Access-Control-Allow-Origin: https://exemplo.com"
-fi
+    if [[ "$status_code" == "301" || "$status_code" == "302" ]]; then
+        echo -e "\e[33m[INFO] Redirecionando para $location\e[0m"
+        # Fazer nova requisição para o local redirecionado
+        if [[ "$location" != http* ]]; then
+            # Se o location não for uma URL completa, adicionar o domínio original
+            local base_url=$(echo "$url" | grep -oP 'https?://[^/]+')
+            location="$base_url$location"
+        fi
+        seguir_redirecionamento "$location" $((depth + 1))
+    fi
+   
+}
 
-# Cross-Origin Read Blocking (CORB) (não é um header, mas pode ser mitigado)
-echo -e "\n🔍 \e[34mCORB (Cross-Origin Read Blocking) é implementado automaticamente pelo Chrome para evitar leitura de conteúdo sensível de outras origens.\e[0m"
-echo "   Para mitigação extra, use Content-Type apropriado para arquivos sensiveis."
+# Iniciar análise com a URL fornecida
+seguir_redirecionamento "$URL" 1
 
+echo -e "\n"
+color_output "INFO" "Verificando misconfiguration"
+echo -e "\n"
+# Obtém os headers da resposta
+HEADERS=$(curl -s -I "$URL" | tr -d '\r')  
 
-# Adicionar referência a OWASP e SecurityHeaders
-echo -e "\n📚 \e[34mReferências para mais informações:\e[0m"
-echo "   🔗 https://owasp.org/www-project-secure-headers/"
-echo "   🔗 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers"
-echo "   🔗 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy"
-echo "   🔗 https://securityheaders.com/"
+# Função para verificar e alertar sobre headers específicos
+check_header() {
+  HEADER_NAME=$1
+  RECOMMENDATION=$2
+  HEADER_VALUE=$(echo "$HEADERS" | grep -iE "^$HEADER_NAME:" | cut -d ':' -f2- | sed 's/^ *//g')
 
-echo -e "\n🔚 \e[34mAnálise concluída!\e[0m 🚀\n"
+  if [[ -n "$HEADER_VALUE" ]]; then
+    color_output "WARNING" "Possível misconfiguration encontrada: $HEADER_NAME"
+    echo -e "  \e[32mValor:\e[0m $HEADER_VALUE"
+    echo -e "  \e[36mRecomendações:\e[0m $RECOMMENDATION"
+    echo "----------------------------------------"
+  fi
+}
+
+# Lista de headers a verificar
+check_header "Server" "Evite expor informações sobre o servidor."
+check_header "X-Powered-By" "Evite expor a tecnologia usada."
+check_header "X-AspNet-Version" "Evite expor a versão do ASP.NET."
+check_header "X-AspNetMvc-Version" "Evite expor a versão do ASP.NET MVC."
+check_header "X-Powered-By-Plesk" "Evite expor o uso do painel de controle Plesk."
+check_header "X-Drupal-Cache" "Evite expor informações sobre a configuração do cache do Drupal."
+check_header "X-Generator" "Evite expor a ferramenta ou framework usado para gerar a página."
+
+# Headers que podem conter informações sensíveis
+check_header "Authorization" "Evite expor tokens de acesso ou chaves API."
+check_header "Set-Cookie" "Certifique-se de usar flags de segurança como HttpOnly, Secure e SameSite."
+check_header "Proxy-Authorization" "Evite expor tokens ou chaves para autenticação com um servidor proxy."
+check_header "X-Api-Key" "Evite expor chaves de API."
+check_header "X-Amz-Security-Token" "Evite expor tokens de segurança temporários da AWS."
+check_header "X-Auth-Token" "Evite expor tokens de autenticação."
+
+color_output "INFO" "Verificação concluída."
