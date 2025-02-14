@@ -20,17 +20,6 @@ modouso() {
     echo -e "\e[31m[ERRO] Uso: $0 <URL>\e[0m"
 }
 
-# Verifica se a URL foi passada como argumento
-if [ -z "${1}" ]; then
-    banner
-    modouso
-    exit 1
-elif [[ ! "${1}" =~ ^https?:// ]]; then
-  color_output "ALERT" "URL inválida: $URL"
-  exit 1
-
-fi
-
 # Função para exibir mensagens coloridas
 color_output() {
   case $1 in
@@ -40,6 +29,19 @@ color_output() {
     *) echo "$2" ;;
   esac
 }
+
+# Verifica se a URL foi passada como argumento
+if [ -z "${1}" ]; then
+    banner
+    modouso
+    exit 1
+elif [[ ! "${1}" =~ ^http:// && ! "${1}" =~ ^https:// ]]; then
+  color_output "ALERT" "URL inválida: $URL"
+  exit 1
+
+fi
+
+
 
 # Lista de headers de segurança recomendados
 HEADERS_RECOMENDADOS=(
