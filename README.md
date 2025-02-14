@@ -78,6 +78,9 @@ Caso não forneça uma URL, a ferramenta mostrará uma mensagem de erro com a si
 
 ![image](https://github.com/user-attachments/assets/ac709234-296d-4a0f-a1a5-691fabf847fe)
 
+![image](https://github.com/user-attachments/assets/b87ec2a4-d88c-4c6f-b418-c409afbf2df2)
+
+
 🚀 Novo Release do Script de Análise de Cabeçalhos HTTP
 A nova versão do nosso script traz melhorias significativas para fortalecer a segurança na análise de cabeçalhos HTTP. Agora, incluímos verificações adicionais e suporte a follow redirect, garantindo uma auditoria mais precisa e abrangente.
 
