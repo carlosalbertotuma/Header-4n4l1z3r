@@ -63,9 +63,25 @@ Caso não forneça uma URL, a ferramenta mostrará uma mensagem de erro com a si
 
 ![image](https://github.com/user-attachments/assets/ac709234-296d-4a0f-a1a5-691fabf847fe)
 
+🚀 Novo Release do Script de Análise de Cabeçalhos HTTP
+A nova versão do nosso script traz melhorias significativas para fortalecer a segurança na análise de cabeçalhos HTTP. Agora, incluímos verificações adicionais e suporte a follow redirect, garantindo uma auditoria mais precisa e abrangente.
+
+🔍 Novidades e Melhorias
+✅ Verificações Adicionais de Cabeçalhos
+O script agora identifica e alerta sobre cabeçalhos que podem expor informações sensíveis, como:
+
+Identificação do servidor e tecnologia utilizada (Server, X-Powered-By, X-AspNet-Version, X-Generator, entre outros).
+Exposição de tokens e chaves de acesso (Authorization, X-Api-Key, X-Auth-Token, Set-Cookie, etc.).
+✅ Follow Redirect
+Agora o script segue redirecionamentos automaticamente, permitindo que a análise alcance o destino final da requisição e identifique possíveis exposições mesmo após múltiplos redirecionamentos.
+
+🔒 Segurança Aprimorada
+A exposição de informações em cabeçalhos HTTP pode facilitar ataques e vazamento de dados. Com essas novas verificações, o script ajuda a identificar configurações inadequadas que podem comprometer a segurança da aplicação.
+
+📌 Baixe e teste agora! Melhore a segurança das suas aplicações e proteja informações sensíveis com essa atualização.
 
 # 📝 Notas Importantes
-A ferramenta é um protótipo na versão 0.1.
+A ferramenta é um protótipo na versão 1.0.
 Está em constante atualização para adicionar mais recursos e verificações.
 Fique atento às mensagens de erro para uma utilização mais eficiente.
 
