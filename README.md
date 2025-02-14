@@ -1,6 +1,6 @@
 # Header-4n4l1z3r
 
-![image](https://github.com/user-attachments/assets/53a8f4bd-9b95-4965-a6f1-500261ec19cd)
+![image](https://github.com/user-attachments/assets/12fbbb9b-709f-47bd-b8e3-1fc849f10f5f)
 
 
 Header-4n4l1z3r é uma ferramenta desenvolvida para verificar os cabeçalhos de segurança presentes em um site, destacando os cabeçalhos recomendados e oferecendo sugestões de melhorias para aumentar a segurança da aplicação. Esta ferramenta ajuda a detectar vulnerabilidades relacionadas à ausência de cabeçalhos essenciais de segurança e oferece orientações claras sobre como corrigi-los.
